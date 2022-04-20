@@ -1,0 +1,107 @@
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Index</title>
+</head>
+
+<body>
+
+    <label > Ingrese su nombre de usuario </label>
+    <input  id = "username" type="text">
+    <button onclick="enviar_datos(document.getElementById('username').value)" > Comenzar </button>
+    <script>
+
+      var vista_lobby = '<div lobby_titulo></div>'+
+      '<div id = "tiempo0"></div>'+
+      '<div id = "usuarios_lobby"></div>';
+
+      var vista_principal = '<div id = pregunta_id></div>'+
+    '<div id = pregunta_actual></div>'+
+    '<div id = pregunta_opcion></div>'+
+    '<div id = score></div>'+
+    '<div id = timer></div>'+
+    '<div id= opciones></div>'+
+    '<div id= chat></div>'+
+    '<div id= text></div>';
+      
+    var vista_resultados = '<div>Resultados</div>'+
+    '<div id = lista_ganadores></div>';
+      
+      var Inicio = true;
+      var dataValida = false;
+      var lobby = false;
+      var time = 0;
+      var mensaje_servidor = '';
+
+    function enviar_datos(username){
+      const ws = new WebSocket("wss://trivia.tallerdeintegracion.cl/connect");
+      ws.addEventListener("open", () => {
+      console.log("You are connected to server");
+    
+      ws.send(JSON.stringify({
+          "type":"join",
+          "id":"f8c064f3-9700-4a08-a857-dad9b2012fbf",
+          "username": document.getElementById('username').value
+        }));
+
+      ws.onmessage = function (msg) {
+        //paso mensaje de Type Mensagge a type string
+          var string1 = String(msg.data);
+          
+          
+          //paso de type string a json para utilizar data
+          var parsed = JSON.parse(string1);
+          console.log(parsed);
+        
+          //solicitud denegada: error
+          if(parsed["type"]  == "denied") {
+            document.write("Solicitud denegada. Motivo:"+parsed["reason"]);
+
+            //mostrar el lobby
+          } else if (parsed["type"]  == "lobby") {
+            document.write("");
+            document.write(vista_lobby);
+
+            document.getElementById("tiempo0").innerHTML = ("Esperando. Tiempo restante:"+parsed["seconds_remaining"]);
+            var lista_lobby = parsed["players"];
+            var element = lista_lobby.map( (e,i) => (i+1+"."+e) ).join(' ');
+            document.getElementById("usuarios_lobby").innerHTML = ("Jugadores Conectados :"+ element);
+              
+          } else if (parsed["type"]  == "timer") {
+            document.getElementById("timer").innerHTML = ("Tiempo restante "+ parsed["seconds_remaining"]);
+
+          } else if (parsed["type"] == "question"){
+            document.write("");
+            document.write(vista_principal);
+            document.getElementById("pregunta_id").innerHTML = ("Question "+ parsed["question_id"]);
+            document.getElementById("pregunta_actual").innerHTML = (parsed["question_title"]);
+            if (parsed["question_type"] == "button"){
+              document.getElementById("opciones").innerHTML = ("Seleccione su alternativa :"+parsed["question_options"]);
+            }else (parsed["question_type"] == "text").innerHTML = ("Escribe tu respuesta     ");
+              
+
+          } else if (parsed["type"] == "chat"){
+            document.write("");
+            document.write(parsed["username"]+" : "+ parsed["message"]);
+            
+
+  
+          } else if (parsed["type"] == "highscore"){
+            document.write("")
+            var lista_ganadores = parsed["winners"]
+            var lista_ganadores1 = lista_lobby.map( (e,i) => (i+1+"."+e) ).join(' ');
+            document.getElementById("lista_ganadores").innerHTML = (lista_ganadores);
+
+          } else {
+            //document.write("cagaste")
+          }
+          
+        };
+      });
+  
+    }
+    </script>
+
+
+</body>
+</html>
