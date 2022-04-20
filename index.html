@@ -1,16 +1,44 @@
 <html>
+
+
+
 <head>
     <meta charset="UTF-8">
     <title>Index</title>
+
+    <style>
+      h1 {
+    font-family: Impact, sans-serif;
+    color: #8A2BE2;
+    text-align: center
+    };
+    div {
+    font: fantasy;
+    color: #40136b;
+    text-align: center
+    };
+
+    .button {
+      background-color: #4CAF50; /* Green */
+      border: none;
+      color: white;
+      padding: 15px 32px;
+      text-align: center;
+      text-decoration: none;
+      display: inline-block;
+      font-size: 16px;
+    }
+
+    
+    </style>
 </head>
 
 <body>
     <center>
     <img src="resources/inicio.jpg">
-    
     <h1 > Ingrese su nombre de usuario </h1>
     <input  id = "username" type="text">
-    <button onclick="enviar_datos(document.getElementById('username').value)" > Comenzar </button>
+    <button onclick="enviar_datos(document.getElementById('username').value)"> Comenzar </button>
   </center>
     
     <script>
@@ -19,17 +47,19 @@
       '<div id = "tiempo0"></div>'+
       '<div id = "usuarios_lobby"></div> </center>';
 
+      var vista_banco = '                 ';
+
       var vista_principal = '<center> <div id = pregunta_id></div>'+
     '<div id = pregunta_actual></div>'+
     '<div id = pregunta_opcion></div>'+
     '<div id = score></div>'+
     '<div id = timer></div>'+
-    '<button id = opcion1> </button><br>'+
-    '<button id = opcion2> </button><br>'+
-    '<button id = opcion3> </button><br>'+
-    '<button id = opcion4> </button><br>'+
-    '<div id= chat></div>'+
-    '<div id= text></div><center>';
+    '<button id = opcion1 hidden>  </button><br>'+
+    '<button id = opcion2 hidden> </button><br>'+
+    '<button id = opcion3 hidden> </button><br>'+
+    '<button id = opcion4 hidden> </button><br>'+
+    '<input  id = "pregunta_chat" type="text" hidden />'+
+    '<input  id = "pregunta_texto" type="text" hidden />';
       
     var vista_resultados = '<div>Resultados</div>'+
     '<div id = lista_ganadores></div>';
@@ -39,7 +69,7 @@
       var lobby = false;
       var time = 0;
       var mensaje_servidor = '';
-
+    
     function enviar_datos(username){
       const ws = new WebSocket("wss://trivia.tallerdeintegracion.cl/connect");
       ws.addEventListener("open", () => {
@@ -60,15 +90,16 @@
           var parsed = JSON.parse(string1);
           console.log(parsed);
         
+          //borro todo lo de la pagina en anterior mensaje
           //solicitud denegada: error
+          
           if(parsed["type"]  == "denied") {
             document.write("Solicitud denegada. Motivo:"+parsed["reason"]);
 
             //mostrar el lobby
           } else if (parsed["type"]  == "lobby") {
-            document.write("");
+            document.close(vista_principal);
             document.write(vista_lobby);
-
             document.getElementById("tiempo0").innerHTML = ("Esperando. Tiempo restante:"+parsed["seconds_remaining"]);
             var lista_lobby = parsed["players"];
             var element = lista_lobby.map( (e,i) => (i+1+"."+e) ).join(' ');
@@ -78,12 +109,18 @@
             document.getElementById("timer").innerHTML = ("Tiempo restante "+ parsed["seconds_remaining"]);
 
           } else if (parsed["type"] == "question"){
-            document.write("");
+            
+            document.close(vista_principal);
             document.write(vista_principal);
             document.getElementById("pregunta_id").innerHTML = ("Question "+ parsed["question_id"]);
             document.getElementById("pregunta_actual").innerHTML = (parsed["question_title"]);
 
+
             if (parsed["question_type"] == "button"){
+              document.getElementById("opcion1").style.display = "block";
+              document.getElementById("opcion2").style.display = "block";
+              document.getElementById("opcion3").style.display = "block";
+              document.getElementById("opcion4").style.display = "block";
 
               document.getElementById("opcion1").innerHTML = ("1 : "+parsed["question_options"]["1"]);
               document.getElementById("opcion2").innerHTML = ("2 : "+parsed["question_options"]["2"]);
@@ -91,17 +128,22 @@
               document.getElementById("opcion4").innerHTML = ("4 : "+parsed["question_options"]["4"]);
 
             
-            }else (parsed["question_type"] == "text").innerHTML = ("Escribe tu respuesta     ");
+            }else if (parsed["question_type"] == "text"){
+              document.getElementById("pregunta_texto").style.display = "block";
               
 
+            }else{
+              document.getElementById("pregunta_chat").style.display = "block";
+            }
+
           } else if (parsed["type"] == "chat"){
-            document.write("");
+
             document.write(parsed["username"]+" : "+ parsed["message"]);
             
-
   
           } else if (parsed["type"] == "highscore"){
-            document.write("")
+            document.close(vista_principal);
+            document.write(vista_resultados);
             var lista_ganadores = parsed["winners"]
             var lista_ganadores1 = lista_lobby.map( (e,i) => (i+1+"."+e) ).join(' ');
             document.getElementById("lista_ganadores").innerHTML = (lista_ganadores);
@@ -114,16 +156,8 @@
       });
   
     }
+
     </script>
-
-<style>
-  h1 {
-font-family: Impact, sans-serif;
-color: #8A2BE2;
-text-align: center
-};
-
-</style>
 
 </body>
 </html>
