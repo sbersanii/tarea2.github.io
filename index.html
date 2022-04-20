@@ -20,7 +20,10 @@
     '<div id = pregunta_opcion></div>'+
     '<div id = score></div>'+
     '<div id = timer></div>'+
-    '<div id= opciones></div>'+
+    '<button id = opcion1> </button><br>'+
+    '<button id = opcion2> </button><br>'+
+    '<button id = opcion3> </button><br>'+
+    '<button id = opcion4> </button><br>'+
     '<div id= chat></div>'+
     '<div id= text></div>';
       
@@ -75,8 +78,15 @@
             document.write(vista_principal);
             document.getElementById("pregunta_id").innerHTML = ("Question "+ parsed["question_id"]);
             document.getElementById("pregunta_actual").innerHTML = (parsed["question_title"]);
+
             if (parsed["question_type"] == "button"){
-              document.getElementById("opciones").innerHTML = ("Seleccione su alternativa :"+parsed["question_options"]);
+
+              document.getElementById("opcion1").innerHTML = ("1 : "+parsed["question_options"]["1"]);
+              document.getElementById("opcion2").innerHTML = ("2 : "+parsed["question_options"]["2"]);
+              document.getElementById("opcion3").innerHTML = ("3 : "+parsed["question_options"]["3"]);
+              document.getElementById("opcion4").innerHTML = ("4 : "+parsed["question_options"]["4"]);
+
+            
             }else (parsed["question_type"] == "text").innerHTML = ("Escribe tu respuesta     ");
               
 
