@@ -5,17 +5,21 @@
 </head>
 
 <body>
-
-    <label > Ingrese su nombre de usuario </label>
+    <center>
+    <img src="resources/inicio.jpg">
+    
+    <h1 > Ingrese su nombre de usuario </h1>
     <input  id = "username" type="text">
     <button onclick="enviar_datos(document.getElementById('username').value)" > Comenzar </button>
+  </center>
+    
     <script>
 
-      var vista_lobby = '<div lobby_titulo></div>'+
+      var vista_lobby = '<center> <div lobby_titulo></div>'+
       '<div id = "tiempo0"></div>'+
-      '<div id = "usuarios_lobby"></div>';
+      '<div id = "usuarios_lobby"></div> </center>';
 
-      var vista_principal = '<div id = pregunta_id></div>'+
+      var vista_principal = '<center> <div id = pregunta_id></div>'+
     '<div id = pregunta_actual></div>'+
     '<div id = pregunta_opcion></div>'+
     '<div id = score></div>'+
@@ -25,7 +29,7 @@
     '<button id = opcion3> </button><br>'+
     '<button id = opcion4> </button><br>'+
     '<div id= chat></div>'+
-    '<div id= text></div>';
+    '<div id= text></div><center>';
       
     var vista_resultados = '<div>Resultados</div>'+
     '<div id = lista_ganadores></div>';
@@ -112,6 +116,14 @@
     }
     </script>
 
+<style>
+  h1 {
+font-family: Impact, sans-serif;
+color: #8A2BE2;
+text-align: center
+};
+
+</style>
 
 </body>
 </html>
