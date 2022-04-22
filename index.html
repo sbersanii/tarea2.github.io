@@ -29,6 +29,7 @@
 
       var question_id = 0;
 
+
       var vista_lobby = '<center> <div lobby_titulo></div>'+
       '<div id = "tiempo0"></div>'+
       '<div id = "usuarios_lobby"></div> </center>';
@@ -37,21 +38,26 @@
 
       var vista_principal = '<center> <div id = pregunta_id></div>'+
       '<div id=id_question hidden></div>'+
-    '<div id = pregunta_actual></div>'+
-    '<div id = pregunta_opcion></div>'+
+
     '<div id = score></div>'+
     '<div id = timer></div>'+
+    '<h1 id = pregunta_actual></h1>'+
     '<button id = opcion1 onclick=enviar_opcion1() hidden>  </button><br>'+
     '<button id = opcion2 onclick=enviar_opcion2() hidden> </button><br>'+
     '<button id = opcion3 onclick=enviar_opcion3() hidden> </button><br>'+
     '<button id = opcion4 onclick=enviar_opcion4() hidden> </button><br>'+
-    '<input  id = "respuesta_chat" type="text" hidden>'+                  
-    '<button id = boton_chat onclick=enviar_texto() hidden > Enviar</button>'+
+    '<input  id = "respuesta_chat" type="text" hidden><br>'+                  
+    '<button id = boton_chat onclick=enviar_texto() hidden > Enviar</button><br>'+
     '<input  id = "respuesta_texto" type="text" hidden>'+
-    '<button id = boton_texto onclick=enviar_texto() hidden >Enviar</button>';
+    '<button id = boton_texto onclick=enviar_texto() hidden >Enviar</button><br>'+
+    '<div id=respuesta_corregida></div>'+
+    '<h1>PUNTAJES</h1>'+
+    '<div id = scores_list></div>';
       
-    var vista_resultados = '<div>Resultados</div>'+
-    '<div id = lista_ganadores></div>';
+      var vista_ganadores = '<center> <div>Resultados</div>'+
+    '<div id = ganador1></div><br>'+
+    '<div id = ganador2></div><br>'+
+    '<div id = ganador3></div><br> </center>';
       
       var Inicio = true;
       var dataValida = false;
@@ -76,6 +82,10 @@
           "question_id":question_id, //id_pregunta,
           "value": "1"
       }));
+      document.getElementById("opcion1").style.display = "none";
+      document.getElementById("opcion2").style.display = "none";
+      document.getElementById("opcion3").style.display = "none";
+      document.getElementById("opcion4").style.display = "none";
       };
 
 
@@ -85,6 +95,10 @@
           "question_id":question_id, //id_pregunta,
           "value": "2"
       }));
+      document.getElementById("opcion1").style.display = "none";
+      document.getElementById("opcion2").style.display = "none";
+      document.getElementById("opcion3").style.display = "none";
+      document.getElementById("opcion4").style.display = "none";
       };
       
       function enviar_opcion3(){
@@ -93,6 +107,10 @@
           "question_id": question_id,//id_pregunta,
           "value": "3"
       }));
+      document.getElementById("opcion1").style.display = "none";
+      document.getElementById("opcion2").style.display = "none";
+      document.getElementById("opcion3").style.display = "none";
+      document.getElementById("opcion4").style.display = "none";
       };
       function enviar_opcion4(){
         ws.send(JSON.stringify({
@@ -100,6 +118,10 @@
           "question_id":question_id, //id_pregunta,
           "value": "4"
       }));
+      document.getElementById("opcion1").style.display = "none";
+      document.getElementById("opcion2").style.display = "none";
+      document.getElementById("opcion3").style.display = "none";
+      document.getElementById("opcion4").style.display = "none";
       };
 
 
@@ -109,6 +131,8 @@
           "question_id":question_id,
           "value": document.getElementById('respuesta_chat').value
       }));
+      document.getElementById("respuesta_texto").style.display = "none";
+      document.getElementById("boton_texto").style.display = "none";
       };    
       
       ws.onmessage = function (msg) {
@@ -141,16 +165,12 @@
           } else if (parsed["type"] == "question"){
             question_id = parsed["question_id"]
 
-          
-            
-            
-
             document.close(vista_principal);
             document.write(vista_principal);
             document.getElementById("pregunta_id").innerHTML = ("Question "+ parsed["question_id"]);
             document.getElementById("id_question").innerHTML = parsed["question_id"];
             document.getElementById("pregunta_actual").innerHTML = (parsed["question_title"]);
-
+            document.getElementById("score").innerHTML = ("Puntaje pregunta : "+parsed["question_points"]);
       
 
 
@@ -177,23 +197,44 @@
 
           } else if (parsed["type"] == "chat"){
   
-            document.write(parsed["timestamp"]+" - "+parsed["username"]+" : "+ parsed["message"]);
+            document.write(parsed["timestamp"].substr(11,8)+" - "+parsed["username"]+" : "+ parsed["message"]);
+            document.write("<br>")
             
           } else if (parsed["type"] == "result"){
-            console.log(parsed);
-            if (parsed["correct"] == true){
-              document.write("¡Correcto!")
-            }else {
-              document.write("INCORRECTO")
+              console.log(parsed);
+              if (parsed["correct"] == true){
+                document.getElementById("respuesta_corregida").innerHTML = "¡CORRECTO!";
+              
+              }else {
+                document.getElementById("respuesta_corregida").innerHTML = "¡INCORRECTO!";
+              }
+          } else if (parsed["type"] == "score"){
+            data = parsed["scores"];
+            for (var clave in data){
+              string_puntajes = ' '
+              if(data.hasOwnProperty(clave)){
+                str_11 = (clave+ " : "+ data[clave]);
+                string_puntajes = string_puntajes+" "+str_11;
+              }
+              document.getElementById('scores_list').innerHTM = (string_puntajes);
             }
-
+            
+            
 
           } else if (parsed["type"] == "highscore"){
             document.close(vista_principal);
-            document.write(vista_resultados);
+            document.write(vista_ganadores);
             var lista_ganadores = parsed["winners"];
-            var lista_ganadores1 = lista_lobby.map( (e,i) => (i+1+"."+e) ).join(' ');
-            document.getElementById("lista_ganadores").innerHTML = (lista_ganadores);
+          //paso mensaje de Type Mensagge a type string
+          var string_ganadores = String(lista_ganadores[0]);
+          
+          //paso de type string a json para utilizar data
+          var parsed0 = JSON.parse(string_ganadores);
+          console.log(parsed0);
+  
+            document.getElementById("ganador1").innerHTML = (parsed0);
+            document.getElementById("ganador2").innerHTML = (lista_ganadores.data);
+            document.getElementById("ganador3").innerHTML = (lista_ganadores);
           
           } else {
             console.log("")
