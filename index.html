@@ -1,7 +1,5 @@
 <html>
 
-
-
 <head>
     <meta charset="UTF-8">
     <title>Index</title>
@@ -11,23 +9,7 @@
     font-family: Impact, sans-serif;
     color: #8A2BE2;
     text-align: center
-    };
-    div {
-    font: fantasy;
-    color: #40136b;
-    text-align: center
-    };
-
-    .button {
-      background-color: #4CAF50; /* Green */
-      border: none;
-      color: white;
-      padding: 15px 32px;
-      text-align: center;
-      text-decoration: none;
-      display: inline-block;
-      font-size: 16px;
-    }
+      }
 
     
     </style>
@@ -38,28 +20,35 @@
     <img src="resources/inicio.jpg">
     <h1 > Ingrese su nombre de usuario </h1>
     <input  id = "username" type="text">
-    <button onclick="enviar_datos(document.getElementById('username').value)"> Comenzar </button>
+    <button onclick="enviar_user()"> Comenzar </button>
+
   </center>
+  
     
     <script>
+
+      var question_id = 0;
 
       var vista_lobby = '<center> <div lobby_titulo></div>'+
       '<div id = "tiempo0"></div>'+
       '<div id = "usuarios_lobby"></div> </center>';
 
-      var vista_banco = '                 ';
+      var sesion_iniciada = false;
 
       var vista_principal = '<center> <div id = pregunta_id></div>'+
+      '<div id=id_question hidden></div>'+
     '<div id = pregunta_actual></div>'+
     '<div id = pregunta_opcion></div>'+
     '<div id = score></div>'+
     '<div id = timer></div>'+
-    '<button id = opcion1 hidden>  </button><br>'+
-    '<button id = opcion2 hidden> </button><br>'+
-    '<button id = opcion3 hidden> </button><br>'+
-    '<button id = opcion4 hidden> </button><br>'+
-    '<input  id = "pregunta_chat" type="text" hidden />'+
-    '<input  id = "pregunta_texto" type="text" hidden />';
+    '<button id = opcion1 onclick=enviar_opcion1() hidden>  </button><br>'+
+    '<button id = opcion2 onclick=enviar_opcion2() hidden> </button><br>'+
+    '<button id = opcion3 onclick=enviar_opcion3() hidden> </button><br>'+
+    '<button id = opcion4 onclick=enviar_opcion4() hidden> </button><br>'+
+    '<input  id = "respuesta_chat" type="text" hidden>'+                  
+    '<button id = boton_chat onclick=enviar_texto() hidden > Enviar</button>'+
+    '<input  id = "respuesta_texto" type="text" hidden>'+
+    '<button id = boton_texto onclick=enviar_texto() hidden >Enviar</button>';
       
     var vista_resultados = '<div>Resultados</div>'+
     '<div id = lista_ganadores></div>';
@@ -67,28 +56,69 @@
       var Inicio = true;
       var dataValida = false;
       var lobby = false;
-      var time = 0;
-      var mensaje_servidor = '';
-    
-    function enviar_datos(username){
-      const ws = new WebSocket("wss://trivia.tallerdeintegracion.cl/connect");
-      ws.addEventListener("open", () => {
-      console.log("You are connected to server");
-    
-      ws.send(JSON.stringify({
-          "type":"join",
-          "id":"f8c064f3-9700-4a08-a857-dad9b2012fbf",
-          "username": document.getElementById('username').value
-        }));
+ 
 
+
+      //console.log("You are connected to server");
+      var ws = new WebSocket("wss://trivia.tallerdeintegracion.cl/connect");
+
+      function enviar_user(){
+      ws.send(JSON.stringify({
+        "type":"join",
+        "id":"f8c064f3-9700-4a08-a857-dad9b2012fbf",
+        "username": document.getElementById('username').value
+      }));
+      };
+
+      function enviar_opcion1(){
+        ws.send(JSON.stringify({
+          "type":"answer",
+          "question_id":question_id, //id_pregunta,
+          "value": "1"
+      }));
+      };
+
+
+      function enviar_opcion2(){
+        ws.send(JSON.stringify({
+          "type":"answer",
+          "question_id":question_id, //id_pregunta,
+          "value": "2"
+      }));
+      };
+      
+      function enviar_opcion3(){
+        ws.send(JSON.stringify({
+          "type":"answer",
+          "question_id": question_id,//id_pregunta,
+          "value": "3"
+      }));
+      };
+      function enviar_opcion4(){
+        ws.send(JSON.stringify({
+          "type":"answer",
+          "question_id":question_id, //id_pregunta,
+          "value": "4"
+      }));
+      };
+
+
+      function enviar_texto(){
+        ws.send(JSON.stringify({
+          "type":"answer",
+          "question_id":question_id,
+          "value": document.getElementById('respuesta_chat').value
+      }));
+      };    
+      
       ws.onmessage = function (msg) {
         //paso mensaje de Type Mensagge a type string
           var string1 = String(msg.data);
           
-          
           //paso de type string a json para utilizar data
           var parsed = JSON.parse(string1);
           console.log(parsed);
+          
         
           //borro todo lo de la pagina en anterior mensaje
           //solicitud denegada: error
@@ -109,11 +139,19 @@
             document.getElementById("timer").innerHTML = ("Tiempo restante "+ parsed["seconds_remaining"]);
 
           } else if (parsed["type"] == "question"){
+            question_id = parsed["question_id"]
+
+          
             
+            
+
             document.close(vista_principal);
             document.write(vista_principal);
             document.getElementById("pregunta_id").innerHTML = ("Question "+ parsed["question_id"]);
+            document.getElementById("id_question").innerHTML = parsed["question_id"];
             document.getElementById("pregunta_actual").innerHTML = (parsed["question_title"]);
+
+      
 
 
             if (parsed["question_type"] == "button"){
@@ -129,33 +167,42 @@
 
             
             }else if (parsed["question_type"] == "text"){
-              document.getElementById("pregunta_texto").style.display = "block";
-              
+              document.getElementById("respuesta_texto").style.display = "block";
+              document.getElementById("boton_texto").style.display = "block";
 
             }else{
-              document.getElementById("pregunta_chat").style.display = "block";
+              document.getElementById("respuesta_chat").style.display = "block";
+              document.getElementById("boton_chat").style.display = "block";
             }
 
           } else if (parsed["type"] == "chat"){
-
-            document.write(parsed["username"]+" : "+ parsed["message"]);
-            
   
+            document.write(parsed["timestamp"]+" - "+parsed["username"]+" : "+ parsed["message"]);
+            
+          } else if (parsed["type"] == "result"){
+            console.log(parsed);
+            if (parsed["correct"] == true){
+              document.write("¡Correcto!")
+            }else {
+              document.write("INCORRECTO")
+            }
+
+
           } else if (parsed["type"] == "highscore"){
             document.close(vista_principal);
             document.write(vista_resultados);
-            var lista_ganadores = parsed["winners"]
+            var lista_ganadores = parsed["winners"];
             var lista_ganadores1 = lista_lobby.map( (e,i) => (i+1+"."+e) ).join(' ');
             document.getElementById("lista_ganadores").innerHTML = (lista_ganadores);
-
+          
           } else {
-            //document.write("cagaste")
+            console.log("")
+           
           }
           
-        };
-      });
+        }
   
-    }
+    
 
     </script>
 
