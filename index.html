@@ -10,8 +10,37 @@
     color: #8A2BE2;
     text-align: center
       }
+      .split {
+  height: 100%;
+  width: 50%;
+  position: fixed;
+  z-index: 1;
+  top: 0;
+  overflow-x: hidden;
+  padding-top: 20px;
+}
 
-    
+/* Control the left side */
+.left {
+  left: 0;
+  background-color: #111;
+}
+
+/* Control the right side */
+.right {
+  right: 0;
+  background-color: red;
+}
+
+/* If you want the content centered horizontally and vertically */
+.centered {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+}
+
     </style>
 </head>
 
@@ -29,14 +58,16 @@
 
       var question_id = 0;
       var string_puntajes = ' ';
+      var id_trivia = ' ';
 
       var vista_lobby = '<center> <div lobby_titulo></div>'+
-      '<div id = "tiempo0"></div>'+
+      '<h1 id = "tiempo0"></h1>'+
       '<div id = "usuarios_lobby"></div> </center>';
 
       var sesion_iniciada = false;
 
-      var vista_principal = '<center> <div id = pregunta_id></div>'+
+      var vista_principal = '<center><div id = trivia_id ></div>'+
+      '<div id = pregunta_id></div>'+
       '<div id=id_question hidden></div>'+
 
     '<div id = score></div>'+
@@ -46,14 +77,14 @@
     '<button id = opcion1 onclick=enviar_opcion1() hidden>  </button><br>'+
     '<button id = opcion2 onclick=enviar_opcion2() hidden> </button><br>'+
     '<button id = opcion3 onclick=enviar_opcion3() hidden> </button><br>'+
-    '<button id = opcion4 onclick=enviar_opcion4() hidden> </button><br>'+
+    '<button id = opcion4 onclick=enviar_opcion4() hidden> </button><br></div>'+
     '<input  id = "respuesta_chat" type="text" hidden><br>'+                  
     '<button id = boton_chat onclick=enviar_texto() hidden > Enviar</button><br>'+
-    '<input  id = "respuesta_texto" type="text" hidden><br>'+
+    '<input  id = "respuesta_texto" type="text" hidden><br></div>'+
     '<button id = boton_texto onclick=enviar_texto() hidden >Enviar</button><br>'+
-    '<div id=respuesta_corregida></div><br></center><br>'+
-    '<center><div>PUNTAJES</div>'+
-    '<div id = lista_puntaje ></div></center>';
+    '<div id=respuesta_corregida></div><br><br>'+
+    '<div class = "split right"><h1 style="text-align:right"">Scores</h1>'+
+    '<div id = lista_puntaje style="text-align:right"></div>';
       
       var vista_ganadores = '<center> <div>Resultados</div>'+
     '<div id = ganador1></div><br>'+
@@ -149,15 +180,17 @@
           //solicitud denegada: error
           
           if(parsed["type"]  == "denied") {
-            document.write("Solicitud denegada. Motivo:"+parsed["reason"]);
+            document.write("<center><h1> Solicitud denegada. Motivo:"+parsed["reason"]+"</h1>");
 
-            //mostrar el lobby
+          }else if (parsed["type"] == "accepted") {
+           id_trivia=parsed["trivia_id"];
+
           } else if (parsed["type"]  == "lobby") {
             document.close(vista_principal);
             document.write(vista_lobby);
             document.getElementById("tiempo0").innerHTML = ("Esperando. Tiempo restante:"+parsed["seconds_remaining"]);
             var lista_lobby = parsed["players"];
-            var element = lista_lobby.map( (e,i) => (i+1+"."+e) ).join(' ');
+            var element = lista_lobby.map( (e,i) => (i+1+"."+e+"<br>") ).join(' ');
             document.getElementById("usuarios_lobby").innerHTML = ("Jugadores Conectados :"+ element);
               
           } else if (parsed["type"]  == "timer") {
@@ -168,6 +201,7 @@
 
             document.close(vista_principal);
             document.write(vista_principal);
+            document.getElementById("trivia_id").innerHTML = ("ID Trivia: "+id_trivia);
             document.getElementById("pregunta_id").innerHTML = ("Question "+ parsed["question_id"]);
             document.getElementById("id_question").innerHTML = parsed["question_id"];
             document.getElementById("pregunta_actual").innerHTML = (parsed["question_title"]);
@@ -197,7 +231,7 @@
             }
 
           } else if (parsed["type"] == "chat"){
-            document.write("    CHAT    ")
+            document.write("<h1>   Mensaje Chat   </h1>")
             document.write("<br>")
             document.write(parsed["timestamp"].substr(11,8)+" - "+parsed["username"]+" : "+ parsed["message"]);
             document.write("<br>")
@@ -231,15 +265,10 @@
             document.close(vista_principal);
             document.write(vista_ganadores);
             var lista_ganadores = parsed["winners"];
-          //paso mensaje de Type Mensagge a type string
-          //var string_ganadores = lista_ganadores;
-          
-          //paso de type string a json para utilizar data
-          //var parsed0 = JSON.parse(string_ganadores);
-          //console.log(parsed0);
+  
             for (element in lista_ganadores){
              
-              document.write("<center>"+"Puesto : "+element+"°  --  Usuario : "+lista_ganadores[element]["username"]+"  --  Puntaje :  "+lista_ganadores[element]["score"]+" -- Streak : "+lista_ganadores[element]["streak"]+"</center>");
+              document.write("<center>"+"Puesto : "+ element +"°  --  Usuario : "+lista_ganadores[element]["username"]+"  --  Puntaje :  "+lista_ganadores[element]["score"]+" -- Streak : "+lista_ganadores[element]["streak"]+"</center>");
               document.write("<br>")
            
             }
