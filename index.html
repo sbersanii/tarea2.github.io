@@ -28,7 +28,7 @@
     <script>
 
       var question_id = 0;
-
+      var string_puntajes = ' ';
 
       var vista_lobby = '<center> <div lobby_titulo></div>'+
       '<div id = "tiempo0"></div>'+
@@ -41,6 +41,7 @@
 
     '<div id = score></div>'+
     '<div id = timer></div>'+
+    '<div id= streak_id></div>'+
     '<h1 id = pregunta_actual></h1>'+
     '<button id = opcion1 onclick=enviar_opcion1() hidden>  </button><br>'+
     '<button id = opcion2 onclick=enviar_opcion2() hidden> </button><br>'+
@@ -48,11 +49,11 @@
     '<button id = opcion4 onclick=enviar_opcion4() hidden> </button><br>'+
     '<input  id = "respuesta_chat" type="text" hidden><br>'+                  
     '<button id = boton_chat onclick=enviar_texto() hidden > Enviar</button><br>'+
-    '<input  id = "respuesta_texto" type="text" hidden>'+
+    '<input  id = "respuesta_texto" type="text" hidden><br>'+
     '<button id = boton_texto onclick=enviar_texto() hidden >Enviar</button><br>'+
-    '<div id=respuesta_corregida></div>'+
-    '<h1>PUNTAJES</h1>'+
-    '<div id = scores_list></div>';
+    '<div id=respuesta_corregida></div><br></center><br>'+
+    '<center><div>PUNTAJES</div>'+
+    '<div id = lista_puntaje ></div></center>';
       
       var vista_ganadores = '<center> <div>Resultados</div>'+
     '<div id = ganador1></div><br>'+
@@ -196,30 +197,36 @@
             }
 
           } else if (parsed["type"] == "chat"){
-  
+            document.write("    CHAT    ")
+            document.write("<br>")
             document.write(parsed["timestamp"].substr(11,8)+" - "+parsed["username"]+" : "+ parsed["message"]);
             document.write("<br>")
             
           } else if (parsed["type"] == "result"){
               console.log(parsed);
               if (parsed["correct"] == true){
-                document.getElementById("respuesta_corregida").innerHTML = "¡CORRECTO!";
+                document.getElementById("respuesta_corregida").innerHTML = "¡ RESPUESTA CORRECTA !";
               
               }else {
-                document.getElementById("respuesta_corregida").innerHTML = "¡INCORRECTO!";
-              }
+                document.getElementById("respuesta_corregida").innerHTML = "¡ RESPUESTA INCORRECTA !";
+              };
+
           } else if (parsed["type"] == "score"){
+
             data = parsed["scores"];
+            str_grande = ""
             for (var clave in data){
-              string_puntajes = ' '
               if(data.hasOwnProperty(clave)){
-                str_11 = (clave+ " : "+ data[clave]);
-                string_puntajes = string_puntajes+" "+str_11;
+                str_11 = ("<br>"+clave+ " : "+ data[clave]+"<br>");
+                str_grande +=str_11;
+              
+              
               }
-              document.getElementById('scores_list').innerHTM = (string_puntajes);
-            }
-            
-            
+              
+            }document.getElementById("lista_puntaje").innerHTML = str_grande;
+          
+          } else if (parsed["type"] == "streak"){
+            document.getElementById("streak_id").innerHTML = ("STREAK : "+parsed["username"]+" : "+parsed["streak"])  
 
           } else if (parsed["type"] == "highscore"){
             document.close(vista_principal);
