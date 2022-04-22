@@ -219,10 +219,9 @@
               if(data.hasOwnProperty(clave)){
                 str_11 = ("<br>"+clave+ " : "+ data[clave]+"<br>");
                 str_grande +=str_11;
-              
-              
+            
               }
-              
+            
             }document.getElementById("lista_puntaje").innerHTML = str_grande;
           
           } else if (parsed["type"] == "streak"){
@@ -233,16 +232,17 @@
             document.write(vista_ganadores);
             var lista_ganadores = parsed["winners"];
           //paso mensaje de Type Mensagge a type string
-          var string_ganadores = String(lista_ganadores[0]);
+          //var string_ganadores = lista_ganadores;
           
           //paso de type string a json para utilizar data
-          var parsed0 = JSON.parse(string_ganadores);
-          console.log(parsed0);
-  
-            document.getElementById("ganador1").innerHTML = (parsed0);
-            document.getElementById("ganador2").innerHTML = (lista_ganadores.data);
-            document.getElementById("ganador3").innerHTML = (lista_ganadores);
-          
+          //var parsed0 = JSON.parse(string_ganadores);
+          //console.log(parsed0);
+            for (element in lista_ganadores){
+             
+              document.write("<center>"+"Puesto : "+element+"°  --  Usuario : "+lista_ganadores[element]["username"]+"  --  Puntaje :  "+lista_ganadores[element]["score"]+" -- Streak : "+lista_ganadores[element]["streak"]+"</center>");
+              document.write("<br>")
+           
+            }
           } else {
             console.log("")
            
